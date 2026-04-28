@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API文档 - AI健康平台</title>
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --accent: #7c3aed;
+            --bg-dark: #0a0f1a;
+            --bg-card: rgba(255,255,255,0.05);
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 0 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover { color: var(--primary); }
+        
+        .content {
+            padding: 120px 5% 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-title {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .page-desc {
+            font-size: 18px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .api-section {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .api-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .api-method {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .method-get { background: rgba(34,197,94,0.2); color: var(--success); }
+        .method-post { background: rgba(0,212,255,0.2); color: var(--primary); }
+        .method-put { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .method-delete { background: rgba(239,68,68,0.2); color: var(--danger); }
+        
+        .api-path {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: var(--primary);
+        }
+        
+        .api-desc {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        
+        .api-params {
+            margin-top: 16px;
+        }
+        
+        .param-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+        
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .param-table th,
+        .param-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+        
+        .param-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        .param-name {
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .param-type {
+            color: var(--accent);
+            font-size: 12px;
+        }
+        
+        .param-required {
+            color: var(--danger);
+            font-size: 11px;
+        }
+        
+        .code-block {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .footer {
+            padding: 40px 5%;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">🏥 AI健康平台</a>
+        <ul class="nav-links">
+            <li><a href="index.html">首页</a></li>
+            <li><a href="features.html">功能详情</a></li>
+            <li><a href="api.html">API文档</a></li>
+            <li><a href="https://github.com/MoKangMedical/ai-health-platform" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+    
+    <div class="content">
+        <h1 class="page-title">API文档</h1>
+        <p class="page-desc">AI健康平台 RESTful API 接口文档</p>
+        
+        <div class="api-section">
+            <div class="api-header">
+                <span class="api-method method-get">GET</span>
+                <span class="api-path">/api/v1/health</span>
+            </div>
+            <p class="api-desc">健康检查接口</p>
+            <div class="code-block">
+<pre>{
+  "status": "healthy",
+  "version": "1.0.0",
+  "timestamp": "2025-04-27T23:00:00"
+}</pre>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <div class="api-header">
+                <span class="api-method method-post">POST</span>
+                <span class="api-path">/api/v1/users/register</span>
+            </div>
+            <p class="api-desc">用户注册</p>
+            <div class="api-params">
+                <div class="param-title">请求参数</div>
+                <table class="param-table">
+                    <tr>
+                        <th>参数</th>
+                        <th>类型</th>
+                        <th>必填</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">openid</span></td>
+                        <td><span class="param-type">string</span></td>
+                        <td><span class="param-required">必填</span></td>
+                        <td>用户唯一标识</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">nickname</span></td>
+                        <td><span class="param-type">string</span></td>
+                        <td>可选</td>
+                        <td>用户昵称</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">phone</span></td>
+                        <td><span class="param-type">string</span></td>
+                        <td>可选</td>
+                        <td>手机号</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="code-block">
+<pre>// 请求
+curl -X POST http://localhost:8200/api/v1/users/register \
+  -d "openid=test_001&nickname=测试用户"
+
+// 响应
+{
+  "status": "success",
+  "user_id": 1,
+  "message": "注册成功"
+}</pre>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <div class="api-header">
+                <span class="api-method method-post">POST</span>
+                <span class="api-path">/api/v1/detect/comprehensive</span>
+            </div>
+            <p class="api-desc">综合健康检测</p>
+            <div class="api-params">
+                <div class="param-title">请求参数 (multipart/form-data)</div>
+                <table class="param-table">
+                    <tr>
+                        <th>参数</th>
+                        <th>类型</th>
+                        <th>必填</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">user_id</span></td>
+                        <td><span class="param-type">integer</span></td>
+                        <td><span class="param-required">必填</span></td>
+                        <td>用户ID</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">audio</span></td>
+                        <td><span class="param-type">file</span></td>
+                        <td>可选</td>
+                        <td>音频文件</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">image</span></td>
+                        <td><span class="param-type">file</span></td>
+                        <td>可选</td>
+                        <td>图片文件</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="code-block">
+<pre>// 响应
+{
+  "status": "success",
+  "record_id": 1,
+  "report": {
+    "overall_score": 85.0,
+    "health_summary": "您的整体健康状态良好",
+    "risks": [...],
+    "tcm_diagnosis": {...},
+    "nutrient_needs": {...}
+  }
+}</pre>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <div class="api-header">
+                <span class="api-method method-post">POST</span>
+                <span class="api-path">/api/v1/formula/generate</span>
+            </div>
+            <p class="api-desc">生成营养配方</p>
+            <div class="api-params">
+                <div class="param-title">请求参数</div>
+                <table class="param-table">
+                    <tr>
+                        <th>参数</th>
+                        <th>类型</th>
+                        <th>必填</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">user_id</span></td>
+                        <td><span class="param-type">integer</span></td>
+                        <td><span class="param-required">必填</span></td>
+                        <td>用户ID</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">health_record_id</span></td>
+                        <td><span class="param-type">integer</span></td>
+                        <td><span class="param-required">必填</span></td>
+                        <td>健康记录ID</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">questionnaire</span></td>
+                        <td><span class="param-type">json</span></td>
+                        <td><span class="param-required">必填</span></td>
+                        <td>问卷数据</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <div class="api-header">
+                <span class="api-method method-post">POST</span>
+                <span class="api-path">/api/v1/agent/chat</span>
+            </div>
+            <p class="api-desc">与AI助手对话</p>
+            <div class="api-params">
+                <div class="param-title">请求参数</div>
+                <table class="param-table">
+                    <tr>
+                        <th>参数</th>
+                        <th>类型</th>
+                        <th>必填</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">user_id</span></td>
+                        <td><span class="param-type">integer</span></td>
+                        <td><span class="param-required">必填</span></td>
+                        <td>用户ID</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">message</span></td>
+                        <td><span class="param-type">string</span></td>
+                        <td><span class="param-required">必填</span></td>
+                        <td>用户消息</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">agent_type</span></td>
+                        <td><span class="param-type">string</span></td>
+                        <td>可选</td>
+                        <td>Agent类型: coordinator/translator/summarizer/advisor</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="code-block">
+<pre>// 响应
+{
+  "status": "success",
+  "response": "您好！我是小和，您的AI健康协调员。",
+  "agent": "coordinator",
+  "intent": "greeting",
+  "confidence": 0.95
+}</pre>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>© 2025 AI健康平台 - <a href="https://github.com/MoKangMedical/ai-health-platform">MoKangMedical</a></p>
+    </footer>
+</body>
+</html>
