@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线演示 - AI健康平台</title>
+    <style>
+        :root { --primary: #00d4ff; --accent: #7c3aed; --bg-dark: #0a0f1a; --text: #ffffff; --text-muted: #94a3b8; --success: #22c55e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg-dark); color: var(--text); line-height: 1.6; }
+        .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10, 15, 26, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0 5%; display: flex; justify-content: space-between; align-items: center; height: 70px; }
+        .logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+        .nav-links { display: flex; gap: 30px; list-style: none; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 15px; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+        .content { padding: 100px 5% 60px; max-width: 1000px; margin: 0 auto; }
+        .page-title { font-size: 42px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+        .page-desc { font-size: 18px; color: var(--text-muted); text-align: center; margin-bottom: 40px; }
+        .demo-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 40px; }
+        .demo-section { margin-bottom: 30px; }
+        .demo-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .demo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .demo-card { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+        .demo-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .demo-card.selected { border-color: var(--primary); background: rgba(0,212,255,0.1); }
+        .demo-card-icon { font-size: 36px; margin-bottom: 12px; }
+        .demo-card-title { font-weight: 600; margin-bottom: 8px; }
+        .demo-card-desc { color: var(--text-muted); font-size: 14px; }
+        .analyze-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 20px; }
+        .analyze-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,212,255,0.4); }
+        .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .result-container { display: none; margin-top: 30px; }
+        .result-container.show { display: block; }
+        .result-header { text-align: center; margin-bottom: 30px; }
+        .result-score { font-size: 72px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .result-label { color: var(--text-muted); font-size: 18px; }
+        .result-summary { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .result-risks { margin-bottom: 20px; }
+        .risk-item { display: flex; align-items: center; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 8px; }
+        .risk-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 12px; }
+        .risk-dot.low { background: var(--success); }
+        .risk-dot.medium { background: #f59e0b; }
+        .risk-dot.high { background: #ef4444; }
+        .result-nutrients { display: flex; flex-wrap: wrap; gap: 10px; }
+        .nutrient-tag { padding: 8px 16px; background: rgba(0,212,255,0.1); border-radius: 20px; font-size: 14px; }
+        .loading { display: none; text-align: center; padding: 40px; }
+        .loading.show { display: block; }
+        .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer { padding: 40px 5%; border-top: 1px solid rgba(255,255,255,0.1); text-align: center; color: var(--text-muted); font-size: 14px; }
+        .footer a { color: var(--primary); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">🏥 AI健康平台</a>
+        <ul class="nav-links">
+            <li><a href="index.html">首页</a></li>
+            <li><a href="features.html">功能</a></li>
+            <li><a href="demo.html">演示</a></li>
+            <li><a href="https://github.com/MoKangMedical/ai-health-platform" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+    
+    <div class="content">
+        <h1 class="page-title">在线演示</h1>
+        <p class="page-desc">体验AI健康检测的完整流程</p>
+        
+        <div class="demo-container">
+            <div class="demo-section">
+                <div class="demo-title">🎤 选择检测类型</div>
+                <div class="demo-grid">
+                    <div class="demo-card" onclick="selectType(this, 'voice')">
+                        <div class="demo-card-icon">🎤</div>
+                        <div class="demo-card-title">语音检测</div>
+                        <div class="demo-card-desc">通过语音特征分析健康状态</div>
+                    </div>
+                    <div class="demo-card" onclick="selectType(this, 'face')">
+                        <div class="demo-card-icon">👤</div>
+                        <div class="demo-card-title">面部检测</div>
+                        <div class="demo-card-desc">通过面部特征分析健康状态</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <div class="demo-title">🎯 选择健康目标</div>
+                <div class="demo-grid">
+                    <div class="demo-card" onclick="selectGoal(this, 'immunity')">
+                        <div class="demo-card-icon">🛡️</div>
+                        <div class="demo-card-title">提升免疫力</div>
+                        <div class="demo-card-desc">增强免疫系统功能</div>
+                    </div>
+                    <div class="demo-card" onclick="selectGoal(this, 'sleep')">
+                        <div class="demo-card-icon">😴</div>
+                        <div class="demo-card-title">改善睡眠</div>
+                        <div class="demo-card-desc">提高睡眠质量</div>
+                    </div>
+                    <div class="demo-card" onclick="selectGoal(this, 'energy')">
+                        <div class="demo-card-icon">⚡</div>
+                        <div class="demo-card-title">增强精力</div>
+                        <div class="demo-card-desc">提升日常活力</div>
+                    </div>
+                    <div class="demo-card" onclick="selectGoal(this, 'skin')">
+                        <div class="demo-card-icon">✨</div>
+                        <div class="demo-card-title">美容养颜</div>
+                        <div class="demo-card-desc">改善皮肤状态</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()" disabled>
+                开始AI分析
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI正在分析您的健康数据...</p>
+            </div>
+            
+            <div class="result-container" id="result">
+                <div class="result-header">
+                    <div class="result-score" id="score">85.0</div>
+                    <div class="result-label">综合健康评分</div>
+                </div>
+                
+                <div class="result-summary">
+                    <h3 style="margin-bottom: 12px;">📋 健康摘要</h3>
+                    <p style="color: var(--text-muted);" id="summary">您的整体健康状态良好，建议关注个别指标的改善。</p>
+                </div>
+                
+                <div class="result-risks">
+                    <h3 style="margin-bottom: 12px;">⚠️ 健康风险评估</h3>
+                    <div id="risks"></div>
+                </div>
+                
+                <div>
+                    <h3 style="margin-bottom: 12px;">💊 推荐营养素</h3>
+                    <div class="result-nutrients" id="nutrients"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>© 2025 AI健康平台 - <a href="https://github.com/MoKangMedical/ai-health-platform">MoKangMedical</a></p>
+    </footer>
+    
+    <script>
+        let selectedType = null;
+        let selectedGoal = null;
+        
+        function selectType(el, type) {
+            document.querySelectorAll('.demo-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedType = type;
+            updateButton();
+        }
+        
+        function selectGoal(el, goal) {
+            el.classList.toggle('selected');
+            selectedGoal = goal;
+            updateButton();
+        }
+        
+        function updateButton() {
+            const btn = document.getElementById('analyzeBtn');
+            btn.disabled = !(selectedType && selectedGoal);
+        }
+        
+        function startAnalysis() {
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const btn = document.getElementById('analyzeBtn');
+            
+            loading.classList.add('show');
+            result.classList.remove('show');
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                loading.classList.remove('show');
+                showResult();
+            }, 2000);
+        }
+        
+        function showResult() {
+            const result = document.getElementById('result');
+            result.classList.add('show');
+            
+            // 模拟结果
+            const score = (75 + Math.random() * 20).toFixed(1);
+            document.getElementById('score').textContent = score;
+            
+            const risks = [
+                {name: '心血管', level: 'low', desc: '心血管功能正常'},
+                {name: '呼吸系统', level: 'low', desc: '呼吸功能良好'},
+                {name: '神经系统', level: 'low', desc: '神经系统功能正常'}
+            ];
+            
+            document.getElementById('risks').innerHTML = risks.map(r => `
+                <div class="risk-item">
+                    <div class="risk-dot ${r.level}"></div>
+                    <div>
+                        <div style="font-weight:600;">${r.name}</div>
+                        <div style="color:var(--text-muted);font-size:13px;">${r.desc}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            const nutrients = ['维生素C', '维生素D', '镁', '锌', 'Omega-3', 'B族维生素'];
+            document.getElementById('nutrients').innerHTML = nutrients.map(n => 
+                `<div class="nutrient-tag">${n}</div>`
+            ).join('');
+        }
+    </script>
+</body>
+</html>
