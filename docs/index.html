@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI健康平台 - 基于多模态AI的个性化健康管理</title>
+    <meta name="description" content="通过语音、面部、视频多模态AI检测，为您提供专属的健康评估和个性化营养方案">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --primary-dark: #0099cc;
+            --accent: #7c3aed;
+            --bg-dark: #0a0f1a;
+            --bg-card: rgba(255,255,255,0.05);
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body { 
+            font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 0 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover { color: var(--primary); }
+        
+        .nav-cta {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.3);
+        }
+        
+        /* 英雄区域 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 100px 5% 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(0,212,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(124,58,237,0.1) 0%, transparent 50%);
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+        
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+        
+        .btn-primary {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,212,255,0.4);
+        }
+        
+        .btn-secondary {
+            padding: 16px 36px;
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: rgba(0,212,255,0.1);
+        }
+        
+        .hero-visual {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .hero-mockup {
+            width: 500px;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2));
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .mockup-content { text-align: center; padding: 40px; }
+        .mockup-icon { font-size: 80px; margin-bottom: 20px; }
+        .mockup-text { font-size: 18px; color: var(--text-muted); }
+        
+        /* 统计数字 */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            padding: 40px;
+            background: rgba(255,255,255,0.03);
+            margin: -50px 5% 0;
+            border-radius: 16px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stat-item { text-align: center; }
+        .stat-number {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label { font-size: 14px; color: var(--text-muted); margin-top: 5px; }
+        
+        /* 功能区域 */
+        .section { padding: 100px 5%; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-tag {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(0,212,255,0.1);
+            border-radius: 15px;
+            font-size: 13px;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+        .section-title { font-size: 42px; font-weight: 700; margin-bottom: 16px; }
+        .section-desc { font-size: 18px; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.4s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0,212,255,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 24px;
+        }
+        
+        .feature-card h3 { font-size: 22px; margin-bottom: 12px; }
+        .feature-card p { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+        
+        /* 定价区域 */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.4s;
+            position: relative;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured::before {
+            content: '推荐';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+        
+        .pricing-name { font-size: 20px; color: var(--text-muted); margin-bottom: 16px; }
+        .pricing-price { font-size: 48px; font-weight: 800; margin-bottom: 8px; }
+        .pricing-price .currency { font-size: 24px; vertical-align: top; }
+        .pricing-price .period { font-size: 16px; color: var(--text-muted); }
+        
+        .pricing-features {
+            list-style: none;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .pricing-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .pricing-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pricing-btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+        }
+        
+        .pricing-btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .pricing-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.3);
+        }
+        
+        /* 评价区域 */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+        
+        .testimonial-text {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .author-name { font-weight: 600; }
+        .author-role { font-size: 13px; color: var(--text-muted); }
+        
+        /* CTA区域 */
+        .cta-section {
+            text-align: center;
+            padding: 100px 5%;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(0,212,255,0.1) 50%, var(--bg-dark) 100%);
+        }
+        
+        .cta-title { font-size: 42px; font-weight: 700; margin-bottom: 20px; }
+        .cta-desc { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; }
+        
+        /* 页脚 */
+        .footer {
+            padding: 60px 5% 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-brand p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 16px;
+            line-height: 1.7;
+        }
+        
+        .footer-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover { color: var(--primary); }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
+        /* GitHub链接 */
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .github-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .hero { flex-direction: column; text-align: center; padding-top: 120px; }
+            .hero h1 { font-size: 40px; }
+            .hero-buttons { justify-content: center; }
+            .hero-visual { display: none; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+            .pricing-card.featured { transform: none; }
+            .pricing-card.featured:hover { transform: translateY(-10px); }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .testimonials-grid { grid-template-columns: 1fr; }
+            .stats-bar { flex-direction: column; gap: 30px; }
+        }
+        
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">🏥</div>
+            AI健康平台
+        </div>
+        <ul class="nav-links">
+            <li><a href="#features">核心功能</a></li>
+            <li><a href="#pricing">定价方案</a></li>
+            <li><a href="#testimonials">用户评价</a></li>
+            <li><a href="https://github.com/MoKangMedical/ai-health-platform" target="_blank">GitHub</a></li>
+        </ul>
+        <button class="nav-cta" onclick="window.open('https://github.com/MoKangMedical/ai-health-platform', '_blank')">查看源码</button>
+    </nav>
+    
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">🚀 AI驱动的健康管理革命</div>
+            <h1>
+                用<span class="gradient">多模态AI</span><br>
+                守护您的健康
+            </h1>
+            <p>
+                通过语音、面部、视频多模态AI检测，为您提供精准的健康评估。
+                基于知识图谱的智能配方引擎，为您定制专属营养方案。
+            </p>
+            <div class="hero-buttons">
+                <a href="https://github.com/MoKangMedical/ai-health-platform" class="btn-primary" target="_blank">
+                    ⭐ GitHub仓库
+                </a>
+                <a href="#features" class="btn-secondary">
+                    了解功能
+                </a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mockup">
+                <div class="mockup-content">
+                    <div class="mockup-icon">🎯</div>
+                    <div class="mockup-text">AI健康检测演示</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-number">59维</div>
+            <div class="stat-label">语音特征分析</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">120+</div>
+            <div class="stat-label">营养成分库</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">4个</div>
+            <div class="stat-label">AI Agent协同</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">48个</div>
+            <div class="stat-label">测试用例</div>
+        </div>
+    </div>
+    
+    <section class="section" id="features">
+        <div class="section-header">
+            <div class="section-tag">核心功能</div>
+            <h2 class="section-title">全方位AI健康管理</h2>
+            <p class="section-desc">融合多模态AI检测、知识图谱、智能配方引擎，打造闭环健康管理生态</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">🎤</div>
+                <h3>语音健康检测</h3>
+                <p>59维声学特征分析，包括基频、抖动、微扰、噪声比等，评估神经系统、呼吸系统、心血管健康风险</p>
+            </div>
+            
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">👤</div>
+                <h3>面部健康分析</h3>
+                <p>6维面部特征提取，分析肤色、纹理、眼睛、唇色、对称性，评估整体健康状态和中医体质</p>
+            </div>
+            
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">💊</div>
+                <h3>AI营养配方</h3>
+                <p>基于知识图谱的智能配方引擎，从120+成分中匹配最适合您的组合，千人千面个性化定制</p>
+            </div>
+            
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">🤖</div>
+                <h3>智能健康助手</h3>
+                <p>4个专业AI Agent协同工作：协调员、医学翻译、健康总结、营养顾问，7×24小时在线服务</p>
+            </div>
+            
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">📊</div>
+                <h3>数据可视化</h3>
+                <p>健康评分圆环图、趋势折线图、风险评估条形图、中医体质雷达图，直观展示健康状态</p>
+            </div>
+            
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">🔬</div>
+                <h3>知识图谱</h3>
+                <p>120+营养成分节点，协同/拮抗关系分析，智能配方优化，确保安全有效的营养组合</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="section" id="pricing">
+        <div class="section-header">
+            <div class="section-tag">定价方案</div>
+            <h2 class="section-title">选择适合您的方案</h2>
+            <p class="section-desc">灵活的订阅制，满足不同需求</p>
+        </div>
+        
+        <div class="pricing-grid">
+            <div class="pricing-card animate-on-scroll">
+                <div class="pricing-name">体验版</div>
+                <div class="pricing-price">
+                    <span class="currency">¥</span>0
+                    <span class="period">/月</span>
+                </div>
+                <ul class="pricing-features">
+                    <li>1次AI健康检测</li>
+                    <li>基础健康报告</li>
+                    <li>AI助手基础咨询</li>
+                    <li>健康知识库访问</li>
+                </ul>
+                <button class="pricing-btn pricing-btn-secondary">免费开始</button>
+            </div>
+            
+            <div class="pricing-card featured animate-on-scroll">
+                <div class="pricing-name">标准版</div>
+                <div class="pricing-price">
+                    <span class="currency">¥</span>299
+                    <span class="period">/月</span>
+                </div>
+                <ul class="pricing-features">
+                    <li>月度AI健康检测</li>
+                    <li>定制营养配方</li>
+                    <li>AI助手无限咨询</li>
+                    <li>健康趋势分析</li>
+                    <li>每月配送营养品</li>
+                </ul>
+                <button class="pricing-btn pricing-btn-primary">立即订阅</button>
+            </div>
+            
+            <div class="pricing-card animate-on-scroll">
+                <div class="pricing-name">专业版</div>
+                <div class="pricing-price">
+                    <span class="currency">¥</span>599
+                    <span class="period">/月</span>
+                </div>
+                <ul class="pricing-features">
+                    <li>周度AI健康检测</li>
+                    <li>高级定制配方</li>
+                    <li>营养师1v1咨询</li>
+                    <li>专属健康管家</li>
+                    <li>优先配送服务</li>
+                </ul>
+                <button class="pricing-btn pricing-btn-secondary">立即订阅</button>
+            </div>
+        </div>
+    </section>
+    
+    <section class="section" id="testimonials">
+        <div class="section-header">
+            <div class="section-tag">用户评价</div>
+            <h2 class="section-title">他们都在用AI健康平台</h2>
+            <p class="section-desc">听听用户怎么说</p>
+        </div>
+        
+        <div class="testimonials-grid">
+            <div class="testimonial-card animate-on-scroll">
+                <div class="testimonial-text">
+                    "以前总觉得保健品是智商税，但AI健康平台让我看到了真正的个性化。基于我的语音检测结果定制的配方，吃了一个月确实感觉精力好了很多。"
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">👩</div>
+                    <div>
+                        <div class="author-name">张女士</div>
+                        <div class="author-role">互联网从业者</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card animate-on-scroll">
+                <div class="testimonial-text">
+                    "作为一个偏瘦但血脂高的人，传统体检总是说没问题。AI健康平台检测出了我的血糖波动问题，定制的营养方案帮我改善了很多。"
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">👨</div>
+                    <div>
+                        <div class="author-name">李先生</div>
+                        <div class="author-role">金融从业者</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card animate-on-scroll">
+                <div class="testimonial-text">
+                    "AI助手小智太方便了，随时可以问营养问题，还会根据我的体质推荐食材。比自己在网上查靠谱多了，而且很有耐心。"
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">👩</div>
+                    <div>
+                        <div class="author-name">王女士</div>
+                        <div class="author-role">教师</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="cta-section">
+        <h2 class="cta-title">开始您的AI健康管理之旅</h2>
+        <p class="cta-desc">免费体验一次AI健康检测，了解您的身体状况</p>
+        <a href="https://github.com/MoKangMedical/ai-health-platform" class="btn-primary" target="_blank">
+            ⭐ Star on GitHub
+        </a>
+    </section>
+    
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="logo">
+                    <div class="logo-icon">🏥</div>
+                    AI健康平台
+                </div>
+                <p>基于多模态AI检测的个性化健康管理平台，用科技守护您的健康。</p>
+                <a href="https://github.com/MoKangMedical/ai-health-platform" class="github-link" target="_blank" style="margin-top:16px;">
+                    ⭐ GitHub
+                </a>
+            </div>
+            
+            <div>
+                <div class="footer-title">产品</div>
+                <ul class="footer-links">
+                    <li><a href="#features">核心功能</a></li>
+                    <li><a href="#pricing">定价方案</a></li>
+                    <li><a href="https://github.com/MoKangMedical/ai-health-platform" target="_blank">GitHub仓库</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <div class="footer-title">文档</div>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/MoKangMedical/ai-health-platform/blob/main/docs/API.md" target="_blank">API文档</a></li>
+                    <li><a href="https://github.com/MoKangMedical/ai-health-platform/blob/main/docs/DEPLOYMENT.md" target="_blank">部署指南</a></li>
+                    <li><a href="https://github.com/MoKangMedical/ai-health-platform/blob/main/CHANGELOG.md" target="_blank">变更日志</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <div class="footer-title">支持</div>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/MoKangMedical/ai-health-platform/issues" target="_blank">提交问题</a></li>
+                    <li><a href="https://github.com/MoKangMedical/ai-health-platform/discussions" target="_blank">讨论区</a></li>
+                    <li><a href="#">联系我们</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2025 AI健康平台 - MoKangMedical. All rights reserved.
+        </div>
+    </footer>
+    
+    <button class="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+    
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.querySelector('.scroll-top');
+            if (window.scrollY > 500) {
+                scrollTop.classList.add('visible');
+            } else {
+                scrollTop.classList.remove('visible');
+            }
+        });
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
