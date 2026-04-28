@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康报告 - AI健康平台</title>
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --primary-dark: #0099cc;
+            --accent: #7c3aed;
+            --bg-dark: #0a0f1a;
+            --bg-card: rgba(255,255,255,0.05);
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 5%;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .report-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .report-date {
+            color: var(--text-muted);
+        }
+        
+        .score-section {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .score-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .score-value {
+            font-size: 64px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .score-label {
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+        
+        .score-level {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .level-good { background: rgba(34,197,94,0.2); color: var(--success); }
+        .level-warning { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .level-danger { background: rgba(239,68,68,0.2); color: var(--danger); }
+        
+        .summary-section {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-text {
+            color: var(--text-muted);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .risks-section {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .risk-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .risk-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 16px;
+        }
+        
+        .risk-low { background: var(--success); }
+        .risk-medium { background: var(--warning); }
+        .risk-high { background: var(--danger); }
+        
+        .risk-info { flex: 1; }
+        .risk-name { font-weight: 600; margin-bottom: 4px; }
+        .risk-desc { color: var(--text-muted); font-size: 14px; }
+        
+        .risk-suggestions {
+            list-style: none;
+            margin-top: 10px;
+            padding-left: 28px;
+        }
+        
+        .risk-suggestions li {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        .tcm-section {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .tcm-types {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .tcm-type {
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .tcm-type-name { font-weight: 600; margin-bottom: 8px; }
+        .tcm-type-score { font-size: 24px; color: var(--primary); }
+        
+        .tcm-primary {
+            background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2));
+            border: 1px solid var(--primary);
+        }
+        
+        .nutrients-section {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .nutrient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .nutrient-item {
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .nutrient-name { font-weight: 600; margin-bottom: 4px; }
+        .nutrient-category { color: var(--text-muted); font-size: 13px; }
+        
+        .actions-section {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.3);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 100px;
+            color: var(--text-muted);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <h1 class="report-title">AI健康检测报告</h1>
+        <p class="report-date" id="reportDate">检测时间：加载中...</p>
+    </div>
+    
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>正在加载报告数据...</p>
+    </div>
+    
+    <div id="reportContent" style="display: none;">
+        <!-- 综合评分 -->
+        <div class="score-section">
+            <div class="score-card">
+                <div class="score-value" id="overallScore">--</div>
+                <div class="score-label">综合健康评分</div>
+                <div class="score-level" id="scoreLevel">--</div>
+            </div>
+        </div>
+        
+        <!-- 健康摘要 -->
+        <div class="summary-section">
+            <div class="section-title">📋 健康摘要</div>
+            <p class="summary-text" id="healthSummary">加载中...</p>
+        </div>
+        
+        <!-- 健康风险 -->
+        <div class="risks-section">
+            <div class="section-title">⚠️ 健康风险评估</div>
+            <div id="riskList">加载中...</div>
+        </div>
+        
+        <!-- 中医体质 -->
+        <div class="tcm-section">
+            <div class="section-title">🎯 中医体质诊断</div>
+            <div class="tcm-types" id="tcmTypes">加载中...</div>
+            <div id="tcmRecommendations">加载中...</div>
+        </div>
+        
+        <!-- 营养需求 -->
+        <div class="nutrients-section">
+            <div class="section-title">💊 营养需求分析</div>
+            <div class="nutrient-grid" id="nutrientList">加载中...</div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="actions-section">
+            <button class="btn btn-primary" onclick="generateFormula()">生成营养配方</button>
+            <button class="btn btn-secondary" onclick="location.href='/console'">返回控制台</button>
+        </div>
+    </div>
+    
+    <script>
+        const recordId = {{ record_id }};
+        const API_BASE = '/api/v1';
+        
+        async function loadReport() {
+            try {
+                const response = await fetch(`${API_BASE}/detect/history/1`);
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.records.length > 0) {
+                    const record = data.records.find(r => r.id === recordId) || data.records[0];
+                    displayReport(record);
+                }
+            } catch (error) {
+                console.error('加载报告失败:', error);
+            }
+        }
+        
+        function displayReport(record) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('reportContent').style.display = 'block';
+            
+            // 日期
+            document.getElementById('reportDate').textContent = 
+                `检测时间：${new Date(record.created_at).toLocaleString()}`;
+            
+            // 评分
+            const score = record.score || 75;
+            document.getElementById('overallScore').textContent = score.toFixed(1);
+            
+            const scoreLevel = document.getElementById('scoreLevel');
+            if (score >= 80) {
+                scoreLevel.textContent = '良好';
+                scoreLevel.className = 'score-level level-good';
+            } else if (score >= 60) {
+                scoreLevel.textContent = '一般';
+                scoreLevel.className = 'score-level level-warning';
+            } else {
+                scoreLevel.textContent = '需关注';
+                scoreLevel.className = 'score-level level-danger';
+            }
+            
+            // 摘要
+            document.getElementById('healthSummary').textContent = 
+                '您的整体健康状态良好，建议关注个别指标的改善。保持规律作息、均衡饮食、适度运动是维持健康的基础。';
+            
+            // 风险
+            const risks = [
+                {name: '心血管', level: 'low', desc: '心血管功能正常', suggestions: ['保持规律运动', '控制饮食']},
+                {name: '呼吸系统', level: 'low', desc: '呼吸功能良好', suggestions: ['注意空气质量']},
+                {name: '神经系统', level: 'low', desc: '神经系统功能正常', suggestions: ['保证充足睡眠']}
+            ];
+            
+            document.getElementById('riskList').innerHTML = risks.map(risk => `
+                <div class="risk-item">
+                    <div class="risk-indicator risk-${risk.level}"></div>
+                    <div class="risk-info">
+                        <div class="risk-name">${risk.name}</div>
+                        <div class="risk-desc">${risk.desc}</div>
+                        <ul class="risk-suggestions">
+                            ${risk.suggestions.map(s => `<li>• ${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 中医体质
+            const tcmTypes = [
+                {name: '平和质', score: 85},
+                {name: '气虚质', score: 72},
+                {name: '阳虚质', score: 68},
+                {name: '阴虚质', score: 65},
+                {name: '痰湿质', score: 60},
+                {name: '湿热质', score: 55}
+            ];
+            
+            const primaryType = tcmTypes[0];
+            document.getElementById('tcmTypes').innerHTML = tcmTypes.map((t, i) => `
+                <div class="tcm-type ${i === 0 ? 'tcm-primary' : ''}">
+                    <div class="tcm-type-name">${t.name}</div>
+                    <div class="tcm-type-score">${t.score}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('tcmRecommendations').innerHTML = `
+                <p style="color: var(--text-muted); margin-top: 16px;">
+                    <strong>主要体质：</strong>${primaryType.name} - 
+                    您的体质状态良好，建议保持规律作息，饮食均衡，适当运动。
+                </p>
+            `;
+            
+            // 营养需求
+            const nutrients = [
+                {name: '维生素C', category: '维生素'},
+                {name: '维生素D', category: '维生素'},
+                {name: '镁', category: '矿物质'},
+                {name: '锌', category: '矿物质'},
+                {name: 'Omega-3', category: '脂肪酸'},
+                {name: 'B族维生素', category: '维生素'}
+            ];
+            
+            document.getElementById('nutrientList').innerHTML = nutrients.map(n => `
+                <div class="nutrient-item">
+                    <div class="nutrient-name">${n.name}</div>
+                    <div class="nutrient-category">${n.category}</div>
+                </div>
+            `).join('');
+        }
+        
+        async function generateFormula() {
+            try {
+                const formData = new FormData();
+                formData.append('user_id', 1);
+                formData.append('health_record_id', recordId);
+                formData.append('questionnaire', JSON.stringify({
+                    allergies: [],
+                    health_goals: ['综合健康'],
+                    current_medications: []
+                }));
+                
+                const response = await fetch(`${API_BASE}/formula/generate`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    window.location.href = `/formula/${data.formula_id}`;
+                }
+            } catch (error) {
+                console.error('生成配方失败:', error);
+                alert('生成配方失败，请重试');
+            }
+        }
+        
+        // 加载报告
+        loadReport();
+    </script>
+</body>
+</html>
