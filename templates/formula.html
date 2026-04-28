@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营养配方 - AI健康平台</title>
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --accent: #7c3aed;
+            --bg-dark: #0a0f1a;
+            --bg-card: rgba(255,255,255,0.05);
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 5%;
+        }
+        
+        .formula-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .formula-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .formula-subtitle {
+            color: var(--text-muted);
+        }
+        
+        .formula-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .ingredient-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 24px;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .ingredient-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .ingredient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .ingredient-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .ingredient-dose {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .ingredient-unit {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        .ingredient-reason {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .instructions-section {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+        
+        .instructions-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .instructions-text {
+            color: var(--text-muted);
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+        
+        .timing-section {
+            background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(124,58,237,0.1));
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+        
+        .timing-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .timing-text {
+            color: var(--text-muted);
+        }
+        
+        .order-section {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .order-price {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .order-price .currency { font-size: 24px; }
+        
+        .order-desc {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+        
+        .order-btn {
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .order-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,212,255,0.4);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border-radius: 25px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 100px;
+            color: var(--text-muted);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="formula-header">
+        <h1 class="formula-title" id="formulaName">加载中...</h1>
+        <p class="formula-subtitle" id="formulaDate">创建时间：--</p>
+    </div>
+    
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>正在加载配方数据...</p>
+    </div>
+    
+    <div id="formulaContent" style="display: none;">
+        <!-- 成分列表 -->
+        <div class="formula-card">
+            <div class="section-title">💊 配方成分</div>
+            <div class="ingredients-grid" id="ingredientList"></div>
+        </div>
+        
+        <!-- 服用说明 -->
+        <div class="formula-card">
+            <div class="section-title">📋 服用说明</div>
+            <div class="instructions-section">
+                <pre class="instructions-text" id="instructions">加载中...</pre>
+            </div>
+        </div>
+        
+        <!-- 服用时间 -->
+        <div class="formula-card">
+            <div class="section-title">⏰ 服用时间建议</div>
+            <div class="timing-section">
+                <p class="timing-text" id="timing">加载中...</p>
+            </div>
+        </div>
+        
+        <!-- 订购区域 -->
+        <div class="order-section">
+            <div class="order-price"><span class="currency">¥</span>299</div>
+            <div class="order-desc">每月配送 · 含AI健康检测 · 无限AI助手咨询</div>
+            <button class="order-btn" onclick="createOrder()">立即订购</button>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="location.href='/console'">返回控制台</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const formulaId = {{ formula_id }};
+        const API_BASE = '/api/v1';
+        
+        async function loadFormula() {
+            try {
+                const response = await fetch(`${API_BASE}/formula/${formulaId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayFormula(data.formula);
+                }
+            } catch (error) {
+                console.error('加载配方失败:', error);
+            }
+        }
+        
+        function displayFormula(formula) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('formulaContent').style.display = 'block';
+            
+            // 标题
+            document.getElementById('formulaName').textContent = formula.name || '个性化营养配方';
+            document.getElementById('formulaDate').textContent = 
+                `创建时间：${formula.created_at ? new Date(formula.created_at).toLocaleString() : '未知'}`;
+            
+            // 成分列表
+            const ingredients = formula.ingredients || [
+                {name: '维生素C', dose: 500, unit: 'mg', reason: '支持免疫系统，抗氧化保护'},
+                {name: '维生素D3', dose: 2000, unit: 'IU', reason: '促进钙吸收，调节免疫功能'},
+                {name: '镁', dose: 300, unit: 'mg', reason: '改善睡眠质量，缓解肌肉紧张'},
+                {name: '锌', dose: 15, unit: 'mg', reason: '增强免疫功能，促进伤口愈合'},
+                {name: 'Omega-3', dose: 1000, unit: 'mg', reason: '心血管保护，抗炎作用'},
+                {name: 'B族维生素', dose: 50, unit: 'mg', reason: '能量代谢支持，神经系统健康'}
+            ];
+            
+            document.getElementById('ingredientList').innerHTML = ingredients.map(ing => `
+                <div class="ingredient-card">
+                    <div class="ingredient-header">
+                        <div class="ingredient-name">${ing.name}</div>
+                        <div>
+                            <span class="ingredient-dose">${ing.dose}</span>
+                            <span class="ingredient-unit">${ing.unit}</span>
+                        </div>
+                    </div>
+                    <div class="ingredient-reason">${ing.reason}</div>
+                </div>
+            `).join('');
+            
+            // 服用说明
+            document.getElementById('instructions').textContent = formula.instructions || 
+`【服用说明】
+1. 每日建议随餐服用，以提高吸收率
+2. 如有不适，请立即停止服用并咨询医生
+3. 请勿超过建议剂量
+
+【成分详情】
+${ingredients.map(ing => `- ${ing.name}: ${ing.dose}${ing.unit} - ${ing.reason}`).join('\n')}`;
+            
+            // 服用时间
+            document.getElementById('timing').textContent = formula.timing || 
+                '随餐服用，分早晚两次。早晨服用能量类成分，睡前服用助眠类成分。';
+        }
+        
+        async function createOrder() {
+            try {
+                const formData = new FormData();
+                formData.append('user_id', 1);
+                formData.append('formula_id', formulaId);
+                formData.append('shipping_address', JSON.stringify({
+                    name: '收件人',
+                    phone: '13800138000',
+                    address: '详细地址'
+                }));
+                
+                const response = await fetch(`${API_BASE}/orders/create`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alert(`订单创建成功！订单号：${data.order_no}`);
+                }
+            } catch (error) {
+                console.error('创建订单失败:', error);
+                alert('创建订单失败，请重试');
+            }
+        }
+        
+        // 加载配方
+        loadFormula();
+    </script>
+</body>
+</html>
