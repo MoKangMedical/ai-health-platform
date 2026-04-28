@@ -1,0 +1,16 @@
+{
+  "name": "AI健康平台",
+  "short_name": "AI健康",
+  "description": "基于多模态AI检测的个性化健康管理平台",
+  "start_url": "/ai-health-platform/",
+  "display": "standalone",
+  "background_color": "#0a0f1a",
+  "theme_color": "#00d4ff",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
