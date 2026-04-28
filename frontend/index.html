@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智健未来 — AI智能健康管理平台</title>
+<style>
+/* ==================== RESET & BASE ==================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-card: #1a2332;
+  --bg-card-hover: #1f2b3d;
+  --accent: #00d4ff;
+  --accent-glow: rgba(0, 212, 255, 0.15);
+  --accent2: #7c3aed;
+  --accent2-glow: rgba(124, 58, 237, 0.15);
+  --accent3: #10b981;
+  --accent4: #f59e0b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: rgba(255,255,255,0.06);
+  --radius: 16px;
+  --transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* ==================== ANIMATED BACKGROUND ==================== */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.bg-orb {
+  position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0;
+}
+.bg-orb--1 { width: 600px; height: 600px; background: rgba(0,212,255,0.07); top: -200px; left: -100px; animation: orbFloat1 20s ease-in-out infinite; }
+.bg-orb--2 { width: 500px; height: 500px; background: rgba(124,58,237,0.06); bottom: -150px; right: -100px; animation: orbFloat2 25s ease-in-out infinite; }
+.bg-orb--3 { width: 400px; height: 400px; background: rgba(16,185,129,0.05); top: 50%; left: 50%; transform: translate(-50%,-50%); animation: orbFloat3 18s ease-in-out infinite; }
+@keyframes orbFloat1 { 0%,100%{ transform: translate(0,0); } 50%{ transform: translate(80px,60px); } }
+@keyframes orbFloat2 { 0%,100%{ transform: translate(0,0); } 50%{ transform: translate(-60px,-80px); } }
+@keyframes orbFloat3 { 0%,100%{ transform: translate(-50%,-50%) scale(1); } 50%{ transform: translate(-40%,-60%) scale(1.1); } }
+
+/* ==================== NAV ==================== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(10,14,23,0.8); backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+}
+.nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.4); }
+.nav__inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 72px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
+}
+.nav__logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.25rem; }
+.nav__logo svg { flex-shrink: 0; }
+.nav__logo span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.nav__links { display: flex; gap: 32px; list-style: none; }
+.nav__links a {
+  font-size: 0.95rem; color: var(--text-secondary); transition: color 0.3s;
+  position: relative;
+}
+.nav__links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+  background: var(--accent); transition: width 0.3s;
+}
+.nav__links a:hover { color: var(--text-primary); }
+.nav__links a:hover::after { width: 100%; }
+.nav__cta {
+  padding: 10px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; border: none; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
+}
+.nav__cta:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,212,255,0.3); }
+.nav__burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.nav__burger span { display: block; width: 24px; height: 2px; background: var(--text-primary); transition: 0.3s; border-radius: 2px; }
+
+/* ==================== HERO ==================== */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 100vh; display: flex; align-items: center;
+  padding-top: 72px;
+}
+.hero__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.hero__badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 100px;
+  background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2);
+  font-size: 0.85rem; color: var(--accent); margin-bottom: 24px;
+  animation: fadeInUp 0.8s ease both;
+}
+.hero__badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+.hero__title {
+  font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800;
+  line-height: 1.2; margin-bottom: 24px;
+  animation: fadeInUp 0.8s 0.1s ease both;
+}
+.hero__title .highlight {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero__desc {
+  font-size: 1.15rem; color: var(--text-secondary); max-width: 520px;
+  margin-bottom: 40px; animation: fadeInUp 0.8s 0.2s ease both;
+}
+.hero__actions { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeInUp 0.8s 0.3s ease both; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; border-radius: 12px; font-size: 1rem; font-weight: 600;
+  border: none; cursor: pointer; transition: var(--transition);
+}
+.btn--primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; box-shadow: 0 4px 20px rgba(0,212,255,0.25);
+}
+.btn--primary:hover { transform: translateY(-3px); box-shadow: 0 8px 35px rgba(0,212,255,0.4); }
+.btn--outline {
+  background: transparent; color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn--outline:hover { border-color: var(--accent); background: var(--accent-glow); }
+.hero__stats { display: flex; gap: 40px; margin-top: 48px; animation: fadeInUp 0.8s 0.4s ease both; }
+.hero__stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+.hero__stat-label { font-size: 0.85rem; color: var(--text-muted); }
+
+/* Hero Visual */
+.hero__visual { position: relative; animation: fadeInRight 1s 0.3s ease both; }
+.hero__card-stack { position: relative; height: 480px; }
+.hero__float-card {
+  position: absolute; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: floatCard 6s ease-in-out infinite;
+}
+.hero__float-card:nth-child(1) { top: 0; left: 10%; width: 340px; animation-delay: 0s; }
+.hero__float-card:nth-child(2) { top: 120px; left: 25%; width: 300px; animation-delay: 1s; }
+.hero__float-card:nth-child(3) { top: 260px; left: 5%; width: 320px; animation-delay: 2s; }
+.hero__float-card:nth-child(4) { top: 340px; left: 30%; width: 260px; animation-delay: 0.5s; }
+@keyframes floatCard { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-12px); } }
+.float-card__header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.float-card__icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.float-card__title { font-weight: 600; font-size: 0.95rem; }
+.float-card__bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); margin-top: 8px; overflow: hidden; }
+.float-card__bar-fill { height: 100%; border-radius: 3px; transition: width 2s ease; }
+.float-card__value { font-size: 1.6rem; font-weight: 800; margin-top: 6px; }
+
+/* ==================== SECTION COMMON ==================== */
+section { position: relative; z-index: 1; padding: 100px 0; }
+.section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.85rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 16px;
+}
+.section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800;
+  margin-bottom: 16px;
+}
+.section-desc { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; }
+.text-center { text-align: center; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+/* ==================== PROCESS / PIPELINE ==================== */
+.process { background: var(--bg-secondary); }
+.pipeline {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+  margin-top: 60px; position: relative;
+}
+.pipeline::before {
+  content: ''; position: absolute; top: 50px; left: 12.5%; right: 12.5%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3), var(--accent4));
+  opacity: 0.4; z-index: 0;
+}
+.pipeline__step {
+  text-align: center; position: relative; z-index: 1;
+  animation: fadeInUp 0.6s ease both;
+}
+.pipeline__step:nth-child(1) { animation-delay: 0.1s; }
+.pipeline__step:nth-child(2) { animation-delay: 0.25s; }
+.pipeline__step:nth-child(3) { animation-delay: 0.4s; }
+.pipeline__step:nth-child(4) { animation-delay: 0.55s; }
+.pipeline__icon-wrap {
+  width: 100px; height: 100px; margin: 0 auto 24px; border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; transition: var(--transition);
+}
+.pipeline__icon-wrap::before {
+  content: ''; position: absolute; inset: -2px; border-radius: 26px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  opacity: 0; transition: opacity 0.4s; z-index: -1;
+}
+.pipeline__step:hover .pipeline__icon-wrap::before { opacity: 1; }
+.pipeline__step:hover .pipeline__icon-wrap { transform: translateY(-8px) scale(1.05); }
+.pipeline__num {
+  position: absolute; top: -10px; right: -10px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #fff;
+}
+.pipeline__title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+.pipeline__desc { font-size: 0.9rem; color: var(--text-secondary); max-width: 220px; margin: 0 auto; }
+
+/* ==================== FEATURES ==================== */
+.features__grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+  margin-top: 60px;
+}
+.feature-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 36px;
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform: scaleX(0); transform-origin: left; transition: transform 0.5s;
+}
+.feature-card:hover { transform: translateY(-6px); border-color: rgba(0,212,255,0.15); background: var(--bg-card-hover); }
+.feature-card:hover::before { transform: scaleX(1); }
+.feature-card__icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.feature-card__title { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; }
+.feature-card__desc { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 20px; }
+.feature-card__list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.feature-card__list li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.9rem; color: var(--text-secondary);
+}
+.feature-card__list li svg { flex-shrink: 0; }
+
+/* ==================== PRICING ==================== */
+.pricing { background: var(--bg-secondary); }
+.pricing__grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  margin-top: 60px; align-items: start;
+}
+.pricing-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 40px 32px;
+  text-align: center; transition: var(--transition); position: relative;
+}
+.pricing-card:hover { transform: translateY(-8px); }
+.pricing-card--featured {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(0,212,255,0.05), var(--bg-card));
+  box-shadow: 0 0 60px rgba(0,212,255,0.08);
+  transform: scale(1.04);
+}
+.pricing-card--featured:hover { transform: scale(1.04) translateY(-8px); }
+.pricing__ribbon {
+  position: absolute; top: 16px; right: -32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 0.75rem; font-weight: 700;
+  padding: 4px 40px; transform: rotate(45deg);
+}
+.pricing__tier { font-size: 0.9rem; font-weight: 600; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.pricing__name { font-size: 1.5rem; font-weight: 800; margin-bottom: 16px; }
+.pricing__price { margin-bottom: 8px; }
+.pricing__amount { font-size: 3rem; font-weight: 800; }
+.pricing__currency { font-size: 1.2rem; vertical-align: top; line-height: 2; color: var(--text-secondary); }
+.pricing__period { font-size: 0.9rem; color: var(--text-muted); }
+.pricing__desc { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 28px; }
+.pricing__features { list-style: none; text-align: left; margin-bottom: 32px; }
+.pricing__features li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; font-size: 0.92rem; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.pricing__features li:last-child { border-bottom: none; }
+.pricing__btn {
+  width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 600;
+  border: none; cursor: pointer; transition: var(--transition);
+}
+.pricing__btn--outline { background: transparent; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.15); }
+.pricing__btn--outline:hover { border-color: var(--accent); background: var(--accent-glow); }
+.pricing__btn--primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 20px rgba(0,212,255,0.25); }
+.pricing__btn--primary:hover { box-shadow: 0 8px 35px rgba(0,212,255,0.4); transform: translateY(-2px); }
+
+/* ==================== CTA ==================== */
+.cta { text-align: center; }
+.cta__box {
+  background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,58,237,0.08));
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 24px; padding: 60px 40px; position: relative; overflow: hidden;
+}
+.cta__box::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(0,212,255,0.05), transparent 60%);
+  animation: rotateBg 15s linear infinite;
+}
+@keyframes rotateBg { to { transform: rotate(360deg); } }
+.cta__title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 16px; position: relative; }
+.cta__desc { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 32px; position: relative; }
+
+/* ==================== FOOTER ==================== */
+.footer {
+  border-top: 1px solid var(--border); padding: 48px 0 32px;
+  position: relative; z-index: 1;
+}
+.footer__grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+.footer__brand p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 12px; max-width: 280px; }
+.footer__col-title { font-weight: 700; margin-bottom: 16px; font-size: 0.95rem; }
+.footer__links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer__links a { font-size: 0.9rem; color: var(--text-secondary); transition: color 0.3s; }
+.footer__links a:hover { color: var(--accent); }
+.footer__bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 24px; border-top: 1px solid var(--border);
+  font-size: 0.85rem; color: var(--text-muted);
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Animated counter ring */
+.ring-chart { width: 60px; height: 60px; }
+.ring-chart circle {
+  fill: none; stroke-width: 4; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: center;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .hero__grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero__visual { display: none; }
+  .features__grid { grid-template-columns: 1fr; }
+  .pricing__grid { grid-template-columns: 1fr; max-width: 440px; margin-left: auto; margin-right: auto; }
+  .pricing-card--featured { transform: none; }
+  .pricing-card--featured:hover { transform: translateY(-8px); }
+  .footer__grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .pipeline { grid-template-columns: repeat(2, 1fr); }
+  .pipeline::before { display: none; }
+  .nav__links { display: none; }
+  .nav__burger { display: flex; }
+  .hero__stats { flex-wrap: wrap; gap: 24px; }
+  .footer__grid { grid-template-columns: 1fr; }
+  .footer__bottom { flex-direction: column; gap: 8px; text-align: center; }
+  section { padding: 60px 0; }
+}
+@media (max-width: 480px) {
+  .pipeline { grid-template-columns: 1fr; }
+  .hero__actions { flex-direction: column; }
+  .btn { justify-content: center; }
+  .pricing__amount { font-size: 2.4rem; }
+}
+
+/* ==================== MOBILE NAV ==================== */
+.mobile-nav {
+  display: none; position: fixed; top: 72px; left: 0; right: 0; bottom: 0;
+  background: rgba(10,14,23,0.96); backdrop-filter: blur(20px);
+  z-index: 999; padding: 40px 24px;
+}
+.mobile-nav.open { display: flex; flex-direction: column; gap: 24px; }
+.mobile-nav a { font-size: 1.2rem; color: var(--text-secondary); padding: 12px 0; border-bottom: 1px solid var(--border); }
+
+/* Glow dots */
+.glow-dot {
+  position: absolute; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 10px var(--accent);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse { 0%,100%{ opacity:0.3; transform: scale(1); } 50%{ opacity:1; transform: scale(1.5); } }
+</style>
+</head>
+<body>
+
+<!-- Background Effects -->
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb--1"></div>
+<div class="bg-orb bg-orb--2"></div>
+<div class="bg-orb bg-orb--3"></div>
+
+<!-- ========== NAVIGATION ========== -->
+<nav class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="javascript:void(0)" class="nav__logo">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <rect width="36" height="36" rx="10" fill="url(#logoGrad)"/>
+        <path d="M10 18h4l3-6 4 12 3-6h2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+      </svg>
+      <span>智健未来</span>
+    </a>
+    <ul class="nav__links">
+      <li><a href="#process">核心流程</a></li>
+      <li><a href="#features">功能模块</a></li>
+      <li><a href="#pricing">服务定价</a></li>
+      <li><a href="#cta">联系我们</a></li>
+    </ul>
+    <button class="nav__cta" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">立即体验</button>
+    <button class="nav__burger" id="burger" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#process" onclick="closeMobile()">核心流程</a>
+  <a href="#features" onclick="closeMobile()">功能模块</a>
+  <a href="#pricing" onclick="closeMobile()">服务定价</a>
+  <a href="#cta" onclick="closeMobile()">联系我们</a>
+</div>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero__grid">
+      <div class="hero__content">
+        <div class="hero__badge">
+          <span class="dot"></span>
+          AI 驱动的精准健康管理
+        </div>
+        <h1 class="hero__title">
+          用 <span class="highlight">人工智能</span> 重新定义<br>个人健康未来
+        </h1>
+        <p class="hero__desc">
+          融合多模态生物传感、深度学习分析与循证医学，打造从检测到干预的全链路智能健康管理系统，让每一位用户享受精准、科学的个性化健康服务。
+        </p>
+        <div class="hero__actions">
+          <button class="btn btn--primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            开始使用
+          </button>
+          <button class="btn btn--outline" onclick="document.getElementById('process').scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            了解流程
+          </button>
+        </div>
+        <div class="hero__stats">
+          <div>
+            <div class="hero__stat-num" data-target="1500000">0</div>
+            <div class="hero__stat-label">累计服务用户</div>
+          </div>
+          <div>
+            <div class="hero__stat-num" data-target="98.6" data-suffix="%">0</div>
+            <div class="hero__stat-label">检测准确率</div>
+          </div>
+          <div>
+            <div class="hero__stat-num" data-target="200">0</div>
+            <div class="hero__stat-label">合作医疗机构</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__visual">
+        <div class="hero__card-stack">
+          <!-- Floating Card 1: Heart Rate -->
+          <div class="hero__float-card">
+            <div class="float-card__header">
+              <div class="float-card__icon" style="background:rgba(239,68,68,0.15);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0 5.4 5.4 0 0 0 0 7.65L12 20.65l8.42-8.42a5.4 5.4 0 0 0 0-7.65z"/></svg>
+              </div>
+              <div>
+                <div class="float-card__title">心率监测</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">实时追踪中</div>
+              </div>
+            </div>
+            <div class="float-card__value" style="color:#ef4444;">72 <span style="font-size:0.9rem;font-weight:400;color:var(--text-muted);">BPM</span></div>
+            <div class="float-card__bar"><div class="float-card__bar-fill" style="width:72%;background:linear-gradient(90deg,#ef4444,#f97316);"></div></div>
+          </div>
+
+          <!-- Floating Card 2: Blood Oxygen -->
+          <div class="hero__float-card">
+            <div class="float-card__header">
+              <div class="float-card__icon" style="background:rgba(0,212,255,0.15);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              </div>
+              <div>
+                <div class="float-card__title">血氧饱和度</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">SpO2 正常</div>
+              </div>
+            </div>
+            <div class="float-card__value" style="color:var(--accent);">98<span style="font-size:0.9rem;font-weight:400;">%</span></div>
+            <div class="float-card__bar"><div class="float-card__bar-fill" style="width:98%;background:linear-gradient(90deg,#00d4ff,#0ea5e9);"></div></div>
+          </div>
+
+          <!-- Floating Card 3: AI Score -->
+          <div class="hero__float-card">
+            <div class="float-card__header">
+              <div class="float-card__icon" style="background:rgba(16,185,129,0.15);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+              </div>
+              <div>
+                <div class="float-card__title">AI 综合评分</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">健康状态良好</div>
+              </div>
+            </div>
+            <div class="float-card__value" style="color:#10b981;">92<span style="font-size:0.9rem;font-weight:400;"> / 100</span></div>
+            <div class="float-card__bar"><div class="float-card__bar-fill" style="width:92%;background:linear-gradient(90deg,#10b981,#34d399);"></div></div>
+          </div>
+
+          <!-- Floating Card 4: Sleep -->
+          <div class="hero__float-card">
+            <div class="float-card__header">
+              <div class="float-card__icon" style="background:rgba(124,58,237,0.15);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </div>
+              <div>
+                <div class="float-card__title">睡眠质量</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">深度睡眠 7.2h</div>
+              </div>
+            </div>
+            <div class="float-card__value" style="color:var(--accent2);">A+<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted); margin-left:6px;">优秀</span></div>
+            <div class="float-card__bar"><div class="float-card__bar-fill" style="width:90%;background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PROCESS ========== -->
+<section class="process" id="process">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        核心流程
+      </div>
+      <h2 class="section-title">四步闭环，科学管理您的健康</h2>
+      <p class="section-desc mx-auto">从智能检测到持续追踪，AI 全程护航，构建完整的个人健康管理体系</p>
+    </div>
+
+    <div class="pipeline reveal">
+      <!-- Step 1: Detection -->
+      <div class="pipeline__step">
+        <div class="pipeline__icon-wrap" style="background:rgba(0,212,255,0.1);">
+          <span class="pipeline__num">1</span>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5">
+            <path d="M9 2h6v4H9z"/><rect x="4" y="6" width="16" height="14" rx="2"/>
+            <circle cx="12" cy="13" r="3"/><path d="M12 10v6M9 13h6" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <h3 class="pipeline__title">智能检测</h3>
+        <p class="pipeline__desc">多模态传感器实时采集生理数据，覆盖血氧、心率、体温等20+指标</p>
+      </div>
+
+      <!-- Step 2: Analysis -->
+      <div class="pipeline__step">
+        <div class="pipeline__icon-wrap" style="background:rgba(124,58,237,0.1);">
+          <span class="pipeline__num">2</span>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            <path d="M2 12h20" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <h3 class="pipeline__title">深度分析</h3>
+        <p class="pipeline__desc">深度学习模型交叉分析多维数据，精准识别健康风险与潜在问题</p>
+      </div>
+
+      <!-- Step 3: Intervention -->
+      <div class="pipeline__step">
+        <div class="pipeline__icon-wrap" style="background:rgba(16,185,129,0.1);">
+          <span class="pipeline__num">3</span>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <h3 class="pipeline__title">精准干预</h3>
+        <p class="pipeline__desc">基于循证医学生成个性化干预方案，涵盖饮食、运动、用药建议</p>
+      </div>
+
+      <!-- Step 4: Tracking -->
+      <div class="pipeline__step">
+        <div class="pipeline__icon-wrap" style="background:rgba(245,158,11,0.1);">
+          <span class="pipeline__num">4</span>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5">
+            <path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>
+            <path d="M2 20h20" stroke-width="1"/>
+          </svg>
+        </div>
+        <h3 class="pipeline__title">持续追踪</h3>
+        <p class="pipeline__desc">7x24小时健康趋势追踪，动态调整方案，形成健康管理闭环</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FEATURES ========== -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        功能模块
+      </div>
+      <h2 class="section-title">四大核心引擎，全面守护健康</h2>
+      <p class="section-desc mx-auto">每个模块独立运行又深度协同，构建完整的智能健康生态</p>
+    </div>
+
+    <div class="features__grid">
+      <!-- Feature 1 -->
+      <div class="feature-card reveal">
+        <div class="feature-card__icon" style="background:rgba(0,212,255,0.1);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5">
+            <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0 5.4 5.4 0 0 0 0 7.65L12 20.65l8.42-8.42a5.4 5.4 0 0 0 0-7.65z"/>
+            <path d="M12 8v4l2 2" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <h3 class="feature-card__title">AI 健康检测中心</h3>
+        <p class="feature-card__desc">集成前沿生物传感技术与AI诊断模型，提供全天候、多维度的健康状态评估服务。</p>
+        <ul class="feature-card__list">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            20+ 生理指标实时监测
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            AI 辅助诊断准确率 98.6%
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            异常数据即时预警推送
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            多设备数据无缝同步
+          </li>
+        </ul>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card reveal">
+        <div class="feature-card__icon" style="background:rgba(124,58,237,0.1);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            <path d="M2 12h20" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <h3 class="feature-card__title">大数据分析引擎</h3>
+        <p class="feature-card__desc">基于千万级临床数据训练的深度学习模型，对健康数据进行交叉分析与风险预测。</p>
+        <ul class="feature-card__list">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            千万级临床数据训练模型
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            多维数据交叉关联分析
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            疾病风险概率预测
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            可视化健康报告生成
+          </li>
+        </ul>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card reveal">
+        <div class="feature-card__icon" style="background:rgba(16,185,129,0.1);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3 class="feature-card__title">精准干预方案</h3>
+        <p class="feature-card__desc">结合循证医学与个体基因特征，为每位用户量身定制科学的健康管理方案。</p>
+        <ul class="feature-card__list">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            个性化饮食与运动计划
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            营养素精准补充建议
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            专家医生在线问诊
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            方案效果动态评估
+          </li>
+        </ul>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card reveal">
+        <div class="feature-card__icon" style="background:rgba(245,158,11,0.1);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+          </svg>
+        </div>
+        <h3 class="feature-card__title">持续追踪系统</h3>
+        <p class="feature-card__desc">构建个人健康档案的长期数字孪生，持续追踪健康轨迹，主动管理健康风险。</p>
+        <ul class="feature-card__list">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            长期健康趋势分析图表
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            智能提醒与用药管理
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            家庭成员协同管理
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            年度健康总结报告
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PRICING ========== -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        服务定价
+      </div>
+      <h2 class="section-title">灵活定价，按需选择</h2>
+      <p class="section-desc mx-auto">从个人基础守护到企业级全面方案，满足不同场景的健康管理需求</p>
+    </div>
+
+    <div class="pricing__grid reveal">
+      <!-- Basic -->
+      <div class="pricing-card">
+        <div class="pricing__tier">基础版</div>
+        <div class="pricing__name">健康守护</div>
+        <div class="pricing__price">
+          <span class="pricing__currency">¥</span>
+          <span class="pricing__amount">99</span>
+          <span class="pricing__period"> / 月</span>
+        </div>
+        <p class="pricing__desc">适合关注个人健康的基础用户</p>
+        <ul class="pricing__features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            10项核心生理指标监测
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            月度AI健康报告
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            基础饮食运动建议
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            异常数据预警通知
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span style="color:var(--text-muted);">基因检测分析</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span style="color:var(--text-muted);">专家在线问诊</span>
+          </li>
+        </ul>
+        <button class="pricing__btn pricing__btn--outline">选择基础版</button>
+      </div>
+
+      <!-- Pro (Featured) -->
+      <div class="pricing-card pricing-card--featured">
+        <div class="pricing__ribbon">推荐</div>
+        <div class="pricing__tier">专业版</div>
+        <div class="pricing__name">精准管理</div>
+        <div class="pricing__price">
+          <span class="pricing__currency">¥</span>
+          <span class="pricing__amount">299</span>
+          <span class="pricing__period"> / 月</span>
+        </div>
+        <p class="pricing__desc">适合追求精准健康管理的用户</p>
+        <ul class="pricing__features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            20+ 全维度生理指标监测
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            周度深度AI健康分析
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            个性化干预方案定制
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            疾病风险预测评估
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            每月2次专家在线问诊
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span style="color:var(--text-muted);">企业级API接入</span>
+          </li>
+        </ul>
+        <button class="pricing__btn pricing__btn--primary">选择专业版</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="pricing-card">
+        <div class="pricing__tier">企业版</div>
+        <div class="pricing__name">全面方案</div>
+        <div class="pricing__price">
+          <span class="pricing__currency">¥</span>
+          <span class="pricing__amount">899</span>
+          <span class="pricing__period"> / 月</span>
+        </div>
+        <p class="pricing__desc">适合企业与医疗机构的全场景方案</p>
+        <ul class="pricing__features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            全部专业版功能
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            基因组检测与分析
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            不限次数专家问诊
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            企业级API与SDK接入
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            多账户家庭协同管理
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            7x24专属健康顾问
+          </li>
+        </ul>
+        <button class="pricing__btn pricing__btn--outline">选择企业版</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA ========== -->
+<section class="cta" id="cta">
+  <div class="container">
+    <div class="cta__box reveal">
+      <h2 class="cta__title">开启您的智能健康管理之旅</h2>
+      <p class="cta__desc">加入超过150万用户的行列，让AI为您的健康保驾护航</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;">
+        <button class="btn btn--primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          免费注册体验
+        </button>
+        <button class="btn btn--outline">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          联系销售顾问
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="javascript:void(0)" class="nav__logo" style="margin-bottom:4px;">
+          <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="10" fill="url(#logoGrad2)"/>
+            <path d="M10 18h4l3-6 4 12 3-6h2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs><linearGradient id="logoGrad2" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+          </svg>
+          <span>智健未来</span>
+        </a>
+        <p>融合AI与循证医学，打造新一代智能健康管理平台，让科技守护每一个生命。</p>
+      </div>
+      <div>
+        <div class="footer__col-title">产品服务</div>
+        <ul class="footer__links">
+          <li><a href="javascript:void(0)">健康检测</a></li>
+          <li><a href="javascript:void(0)">数据分析</a></li>
+          <li><a href="javascript:void(0)">干预方案</a></li>
+          <li><a href="javascript:void(0)">追踪管理</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer__col-title">解决方案</div>
+        <ul class="footer__links">
+          <li><a href="javascript:void(0)">个人用户</a></li>
+          <li><a href="javascript:void(0)">医疗机构</a></li>
+          <li><a href="javascript:void(0)">企业健康</a></li>
+          <li><a href="javascript:void(0)">API 接入</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer__col-title">关于我们</div>
+        <ul class="footer__links">
+          <li><a href="javascript:void(0)">公司介绍</a></li>
+          <li><a href="about.html">科研团队</a></li>
+          <li><a href="javascript:void(0)">隐私政策</a></li>
+          <li><a href="contact.html">联系我们</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>&copy; 2026 智健未来科技有限公司 版权所有</span>
+      <span>京ICP备2026000000号</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ========== SCRIPTS ========== -->
+<script>
+// Nav scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Mobile nav toggle
+const burger = document.getElementById('burger');
+const mobileNav = document.getElementById('mobileNav');
+burger.addEventListener('click', () => {
+  mobileNav.classList.toggle('open');
+});
+function closeMobile() {
+  mobileNav.classList.remove('open');
+}
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+reveals.forEach(el => revealObserver.observe(el));
+
+// Animated counters
+function animateCounter(el) {
+  const target = parseFloat(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  const isDecimal = target % 1 !== 0;
+  const duration = 2000;
+  const start = performance.now();
+
+  function update(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    let current = eased * target;
+    if (target >= 10000) {
+      el.textContent = (current / 10000).toFixed(0) + '万+';
+    } else if (isDecimal) {
+      el.textContent = current.toFixed(1) + suffix;
+    } else {
+      el.textContent = Math.round(current) + suffix;
+    }
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateCounter(entry.target);
+      counterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.hero__stat-num').forEach(el => counterObserver.observe(el));
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
